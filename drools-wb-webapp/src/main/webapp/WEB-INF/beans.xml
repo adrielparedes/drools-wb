@@ -29,6 +29,7 @@
     <exclude name="org.guvnor.m2repo.client.**"/>
     <exclude name="org.guvnor.organizationalunit.manager.client.**"/>
     <exclude name="org.guvnor.structure.client.**"/>
+    <exclude name="org.guvnor.pullrequest.client.**"/>
 
     <exclude name="org.kie.workbench.common.screens.contributors.client.**"/>
     <exclude name="org.kie.workbench.common.screens.datamodeller.client.**"/>
