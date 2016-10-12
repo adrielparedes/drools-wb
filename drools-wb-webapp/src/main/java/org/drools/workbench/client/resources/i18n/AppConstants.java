@@ -99,4 +99,6 @@ public interface AppConstants
     String Library();
 
     String AdminPreferences();
+    
+String PullRequests();
 }
