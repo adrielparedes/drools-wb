@@ -20,10 +20,13 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
+import com.google.gwt.user.client.Window;
 import org.drools.workbench.client.resources.i18n.AppConstants;
 import org.guvnor.asset.management.client.editors.repository.wizard.CreateRepositoryWizard;
 import org.guvnor.pullrequest.client.list.PullRequestListPresenter;
 import org.guvnor.structure.client.editors.repository.clone.CloneRepositoryPresenter;
+import org.guvnor.structure.repositories.PullRequestService;
+import org.jboss.errai.common.client.api.Caller;
 import org.jboss.errai.ioc.client.container.SyncBeanManager;
 import org.kie.workbench.common.widgets.client.handlers.NewResourcePresenter;
 import org.kie.workbench.common.workbench.client.PerspectiveIds;
@@ -105,6 +108,7 @@ public class AdministrationPerspective {
     }
 
     private List<? extends MenuItem> getRepositoriesMenuItems() {
+
         ArrayList<MenuItem> menuItems = new ArrayList<MenuItem>();
         menuItems.add( MenuFactory.newSimpleItem( AppConstants.INSTANCE.MenuListRepositories() ).respondsWith(
                 new Command() {

@@ -50,4 +50,5 @@
     <exclude name="org.kie.workbench.common.workbench.client.**"/>
 
   </scan>
+
 </beans>
