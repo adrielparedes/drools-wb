@@ -17,10 +17,7 @@
 package org.drools.workbench.screens.guided.dtree.backend.server.indexing;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
-import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.search.Query;
 import org.drools.workbench.screens.guided.dtree.type.GuidedDTreeResourceTypeDefinition;
 import org.junit.Test;
@@ -29,7 +26,6 @@ import org.kie.workbench.common.services.refactoring.backend.server.TestIndexer;
 import org.kie.workbench.common.services.refactoring.backend.server.query.builder.SingleTermQueryBuilder;
 import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueReferenceIndexTerm;
 import org.kie.workbench.common.services.refactoring.service.ResourceType;
-import org.uberfire.ext.metadata.engine.Index;
 import org.uberfire.java.nio.file.Path;
 
 public class IndexRuleMultipleTypesTest extends BaseIndexingTest<GuidedDTreeResourceTypeDefinition> {
@@ -37,38 +33,41 @@ public class IndexRuleMultipleTypesTest extends BaseIndexingTest<GuidedDTreeReso
     @Test
     public void testIndexDrlRuleMultipleTypes() throws IOException, InterruptedException {
         //Add test files
-        final Path path1 = basePath.resolve( "drl3.tdrl" );
-        final String drl1 = loadText( "drl3.tdrl" );
-        ioService().write( path1,
-                           drl1 );
-        final Path path2 = basePath.resolve( "drl4.tdrl" );
-        final String drl2 = loadText( "drl4.tdrl" );
-        ioService().write( path2,
-                           drl2 );
+        final Path path1 = basePath.resolve("drl3.tdrl");
+        final String drl1 = loadText("drl3.tdrl");
+        ioService().write(path1,
+                          drl1);
+        final Path path2 = basePath.resolve("drl4.tdrl");
+        final String drl2 = loadText("drl4.tdrl");
+        ioService().write(path2,
+                          drl2);
 
-        Thread.sleep( 5000 ); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
-
-        final Index index = getConfig().getIndexManager().get( org.uberfire.ext.metadata.io.KObjectUtil.toKCluster( basePath.getFileSystem() ) );
+        Thread.sleep(5000); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
 
         {
-            final Query query = new SingleTermQueryBuilder( new ValueReferenceIndexTerm( "org.drools.workbench.screens.guided.dtree.backend.server.indexing.classes.Applicant", ResourceType.JAVA ) )
+            final Query query = new SingleTermQueryBuilder(new ValueReferenceIndexTerm("org.drools.workbench.screens.guided.dtree.backend.server.indexing.classes.Applicant",
+                                                                                       ResourceType.JAVA))
                     .build();
-            searchFor(index,  query, 2, path1, path2);
+            searchFor(query,
+                      2,
+                      path1,
+                      path2);
         }
 
         {
-            final Query query = new SingleTermQueryBuilder( new ValueReferenceIndexTerm( "org.drools.workbench.screens.guided.dtree.backend.server.indexing.classes.Mortgage", ResourceType.JAVA ) )
+            final Query query = new SingleTermQueryBuilder(new ValueReferenceIndexTerm("org.drools.workbench.screens.guided.dtree.backend.server.indexing.classes.Mortgage",
+                                                                                       ResourceType.JAVA))
                     .build();
-            searchFor(index,  query, 1, path2);
+            searchFor(query,
+                      1,
+                      path2);
         }
-
     }
 
     @Override
     protected TestIndexer getIndexer() {
         return new TestGuidedDecisionTreeFileIndexer();
     }
-
 
     @Override
     protected GuidedDTreeResourceTypeDefinition getResourceTypeDefinition() {
@@ -79,5 +78,4 @@ public class IndexRuleMultipleTypesTest extends BaseIndexingTest<GuidedDTreeReso
     protected String getRepositoryName() {
         return this.getClass().getSimpleName();
     }
-
 }

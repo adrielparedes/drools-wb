@@ -13,9 +13,11 @@
   <logger name="org.drools" level="info"/>
   <logger name="org.guvnor" level="info"/>
   <logger name="org.uberfire.backend" level="debug"/>
+  <logger name="org.apache.lucene" level="debug"/>
+  <logger name="org.hibernate.search" level="debug"/>
 
-  <root level="error">
-    <appender-ref ref="consoleAppender" />
+  <root level="debug">
+    <appender-ref ref="consoleAppender"/>
   </root>
 
 </configuration>

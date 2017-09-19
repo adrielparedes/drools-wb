@@ -27,8 +27,6 @@ import org.kie.workbench.common.services.refactoring.backend.server.query.builde
 import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueIndexTerm.TermSearchType;
 import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueSharedPartIndexTerm;
 import org.kie.workbench.common.services.refactoring.service.PartType;
-import org.uberfire.ext.metadata.engine.Index;
-import org.uberfire.ext.metadata.io.KObjectUtil;
 import org.uberfire.java.nio.file.Path;
 
 public class IndexRuleAttributeNameTest extends BaseIndexingTest<GuidedRuleDRLResourceTypeDefinition> {
@@ -36,19 +34,20 @@ public class IndexRuleAttributeNameTest extends BaseIndexingTest<GuidedRuleDRLRe
     @Test
     public void testIndexDrlRuleAttributeNames() throws IOException, InterruptedException {
         //Add test files
-        final Path path = basePath.resolve( "drl1.rdrl" );
-        final String drl = loadText( "drl1.rdrl" );
-        ioService().write( path,
-                           drl );
+        final Path path = basePath.resolve("drl1.rdrl");
+        final String drl = loadText("drl1.rdrl");
+        ioService().write(path,
+                          drl);
 
-        Thread.sleep( 5000 ); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
-
-        final Index index = getConfig().getIndexManager().get( KObjectUtil.toKCluster( basePath.getFileSystem() ) );
+        Thread.sleep(5000); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
 
         {
-            final Query query = new SingleTermQueryBuilder( new ValueSharedPartIndexTerm( "*", PartType.RULEFLOW_GROUP, TermSearchType.WILDCARD ) )
+            final Query query = new SingleTermQueryBuilder(new ValueSharedPartIndexTerm("*",
+                                                                                        PartType.RULEFLOW_GROUP,
+                                                                                        TermSearchType.WILDCARD))
                     .build();
-            searchFor(index, query, 1 );
+            searchFor(query,
+                      1);
         }
     }
 
@@ -66,5 +65,4 @@ public class IndexRuleAttributeNameTest extends BaseIndexingTest<GuidedRuleDRLRe
     protected String getRepositoryName() {
         return this.getClass().getSimpleName();
     }
-
 }

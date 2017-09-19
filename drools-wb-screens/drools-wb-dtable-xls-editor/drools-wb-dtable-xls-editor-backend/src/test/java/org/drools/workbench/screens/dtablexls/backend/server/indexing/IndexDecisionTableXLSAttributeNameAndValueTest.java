@@ -19,11 +19,8 @@ package org.drools.workbench.screens.dtablexls.backend.server.indexing;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
@@ -32,12 +29,9 @@ import org.drools.workbench.screens.dtablexls.type.DecisionTableXLSResourceTypeD
 import org.junit.Test;
 import org.kie.workbench.common.services.refactoring.backend.server.BaseIndexingTest;
 import org.kie.workbench.common.services.refactoring.backend.server.TestIndexer;
-import org.kie.workbench.common.services.refactoring.model.index.terms.ProjectRootPathIndexTerm;
 import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueIndexTerm;
 import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueSharedPartIndexTerm;
 import org.kie.workbench.common.services.refactoring.service.PartType;
-import org.uberfire.ext.metadata.backend.lucene.analyzer.FilenameAnalyzer;
-import org.uberfire.ext.metadata.engine.Index;
 import org.uberfire.java.nio.file.Path;
 
 public class IndexDecisionTableXLSAttributeNameAndValueTest extends BaseIndexingTest<DecisionTableXLSResourceTypeDefinition> {
@@ -45,21 +39,24 @@ public class IndexDecisionTableXLSAttributeNameAndValueTest extends BaseIndexing
     @Test
     public void testIndexDecisionTableXLSAttributeNameAndValue() throws IOException, InterruptedException {
         //Add test files
-        final Path path1 = loadXLSFile( basePath,
-                                        "dtable1.xls" );
-        final Path path2 = loadXLSFile( basePath,
-                                        "dtable2.xls" );
+        final Path path1 = loadXLSFile(basePath,
+                                       "dtable1.xls");
+        final Path path2 = loadXLSFile(basePath,
+                                       "dtable2.xls");
 
-        Thread.sleep( 5000 ); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
-
-        final Index index = getConfig().getIndexManager().get( org.uberfire.ext.metadata.io.KObjectUtil.toKCluster( basePath.getFileSystem() ) );
+        Thread.sleep(5000); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
 
         //This simply checks whether there is a Rule Attribute "ruleflow-group" with a Rule Attribute Value "myRuleflowGroup"
         {
             final BooleanQuery query = new BooleanQuery();
-            ValueIndexTerm valTerm = new ValueSharedPartIndexTerm("myruleflowgroup", PartType.RULEFLOW_GROUP);
-            query.add( new TermQuery( new Term( valTerm.getTerm(), valTerm.getValue())), BooleanClause.Occur.MUST );
-            searchFor(index, query, 1, path1);
+            ValueIndexTerm valTerm = new ValueSharedPartIndexTerm("myruleflowgroup",
+                                                                  PartType.RULEFLOW_GROUP);
+            query.add(new TermQuery(new Term(valTerm.getTerm(),
+                                             valTerm.getValue())),
+                      BooleanClause.Occur.MUST);
+            searchFor(query,
+                      1,
+                      path1);
         }
     }
 
@@ -78,16 +75,15 @@ public class IndexDecisionTableXLSAttributeNameAndValueTest extends BaseIndexing
         return this.getClass().getSimpleName();
     }
 
-    private Path loadXLSFile( final Path basePath,
-                              final String fileName ) throws IOException {
-        final Path path = basePath.resolve( fileName );
-        final InputStream is = this.getClass().getResourceAsStream( fileName );
-        final OutputStream os = ioService().newOutputStream( path );
-        IOUtils.copy( is,
-                      os );
+    private Path loadXLSFile(final Path basePath,
+                             final String fileName) throws IOException {
+        final Path path = basePath.resolve(fileName);
+        final InputStream is = this.getClass().getResourceAsStream(fileName);
+        final OutputStream os = ioService().newOutputStream(path);
+        IOUtils.copy(is,
+                     os);
         os.flush();
         os.close();
         return path;
     }
-
 }

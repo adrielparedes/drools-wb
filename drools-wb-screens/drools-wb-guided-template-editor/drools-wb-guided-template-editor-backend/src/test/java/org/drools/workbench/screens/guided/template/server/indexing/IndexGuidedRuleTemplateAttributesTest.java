@@ -18,10 +18,7 @@ package org.drools.workbench.screens.guided.template.server.indexing;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
-import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.search.Query;
 import org.appformer.project.datamodel.imports.Import;
 import org.drools.workbench.models.guided.template.backend.RuleTemplateModelXMLPersistenceImpl;
@@ -34,7 +31,6 @@ import org.kie.workbench.common.services.refactoring.backend.server.query.builde
 import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueIndexTerm.TermSearchType;
 import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueSharedPartIndexTerm;
 import org.kie.workbench.common.services.refactoring.service.PartType;
-import org.uberfire.ext.metadata.engine.Index;
 import org.uberfire.java.nio.file.Path;
 
 public class IndexGuidedRuleTemplateAttributesTest extends BaseIndexingTest<GuidedRuleTemplateResourceTypeDefinition> {
@@ -42,35 +38,39 @@ public class IndexGuidedRuleTemplateAttributesTest extends BaseIndexingTest<Guid
     @Test
     public void testIndexGuidedRuleTemplateAttributes() throws IOException, InterruptedException {
         //Add test files
-        final Path path = basePath.resolve( "template1.template" );
-        final TemplateModel model = GuidedRuleTemplateFactory.makeModelWithAttributes( "org.drools.workbench.screens.guided.template.server.indexing",
-                                                                                       new ArrayList<Import>() {{
-                                                                                           add( new Import( "org.drools.workbench.screens.guided.template.server.indexing.classes.Applicant" ) );
-                                                                                           add( new Import( "org.drools.workbench.screens.guided.template.server.indexing.classes.Mortgage" ) );
-                                                                                       }},
-                                                                                       "template1" );
-        final String xml = RuleTemplateModelXMLPersistenceImpl.getInstance().marshal( model );
-        ioService().write( path,
-                           xml );
+        final Path path = basePath.resolve("template1.template");
+        final TemplateModel model = GuidedRuleTemplateFactory.makeModelWithAttributes("org.drools.workbench.screens.guided.template.server.indexing",
+                                                                                      new ArrayList<Import>() {{
+                                                                                          add(new Import("org.drools.workbench.screens.guided.template.server.indexing.classes.Applicant"));
+                                                                                          add(new Import("org.drools.workbench.screens.guided.template.server.indexing.classes.Mortgage"));
+                                                                                      }},
+                                                                                      "template1");
+        final String xml = RuleTemplateModelXMLPersistenceImpl.getInstance().marshal(model);
+        ioService().write(path,
+                          xml);
 
-        Thread.sleep( 5000 ); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
-
-        final Index index = getConfig().getIndexManager().get( org.uberfire.ext.metadata.io.KObjectUtil.toKCluster( basePath.getFileSystem() ) );
+        Thread.sleep(5000); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
 
         {
-            final Query query = new SingleTermQueryBuilder( new ValueSharedPartIndexTerm( "*", PartType.RULEFLOW_GROUP, TermSearchType.WILDCARD ) )
+            final Query query = new SingleTermQueryBuilder(new ValueSharedPartIndexTerm("*",
+                                                                                        PartType.RULEFLOW_GROUP,
+                                                                                        TermSearchType.WILDCARD))
                     .build();
-            searchFor(index, query, 1, path);
+            searchFor(query,
+                      1,
+                      path);
         }
 
         //Rule Template defining a RuleFlow-Group named myRuleFlowGroup. This should match template1.template
         //This checks whether there is a Rule Attribute "ruleflow-group" and its Value is "myRuleflowGroup"
         {
-            final Query query = new SingleTermQueryBuilder( new ValueSharedPartIndexTerm( "myRuleFlowGroup", PartType.RULEFLOW_GROUP) )
+            final Query query = new SingleTermQueryBuilder(new ValueSharedPartIndexTerm("myRuleFlowGroup",
+                                                                                        PartType.RULEFLOW_GROUP))
                     .build();
-            searchFor(index, query, 1, path);
+            searchFor(query,
+                      1,
+                      path);
         }
-
     }
 
     @Override
@@ -87,5 +87,4 @@ public class IndexGuidedRuleTemplateAttributesTest extends BaseIndexingTest<Guid
     protected String getRepositoryName() {
         return this.getClass().getSimpleName();
     }
-
 }

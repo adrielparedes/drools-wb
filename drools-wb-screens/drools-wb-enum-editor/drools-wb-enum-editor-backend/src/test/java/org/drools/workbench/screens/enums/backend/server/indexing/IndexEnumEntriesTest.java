@@ -28,7 +28,6 @@ import org.kie.workbench.common.services.refactoring.model.index.terms.valueterm
 import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueReferenceIndexTerm;
 import org.kie.workbench.common.services.refactoring.service.PartType;
 import org.kie.workbench.common.services.refactoring.service.ResourceType;
-import org.uberfire.ext.metadata.engine.Index;
 import org.uberfire.java.nio.file.Path;
 
 public class IndexEnumEntriesTest extends BaseIndexingTest<EnumResourceTypeDefinition> {
@@ -36,51 +35,63 @@ public class IndexEnumEntriesTest extends BaseIndexingTest<EnumResourceTypeDefin
     @Test
     public void testIndexEnumEntries() throws IOException, InterruptedException {
         //Add test files
-        final Path path1 = basePath.resolve( "enum1.enumeration" );
-        final String dsl1 = loadText( "enum1.enumeration" );
-        ioService().write( path1,
-                           dsl1 );
-        final Path path2 = basePath.resolve( "enum2.enumeration" );
-        final String dsl2 = loadText( "enum2.enumeration" );
-        ioService().write( path2,
-                           dsl2 );
-        final Path path3 = basePath.resolve( "enum3.enumeration" );
-        final String dsl3 = loadText( "enum3.enumeration" );
-        ioService().write( path3,
-                           dsl3 );
+        final Path path1 = basePath.resolve("enum1.enumeration");
+        final String dsl1 = loadText("enum1.enumeration");
+        ioService().write(path1,
+                          dsl1);
+        final Path path2 = basePath.resolve("enum2.enumeration");
+        final String dsl2 = loadText("enum2.enumeration");
+        ioService().write(path2,
+                          dsl2);
+        final Path path3 = basePath.resolve("enum3.enumeration");
+        final String dsl3 = loadText("enum3.enumeration");
+        ioService().write(path3,
+                          dsl3);
 
-        Thread.sleep( 5000 ); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
-
-        final Index index = getConfig().getIndexManager().get( org.uberfire.ext.metadata.io.KObjectUtil.toKCluster( basePath.getFileSystem() ) );
+        Thread.sleep(5000); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
 
         //Enumerations using org.drools.workbench.screens.enums.backend.server.indexing.classes.Applicant
         {
-            final Query query = new SingleTermQueryBuilder( new ValueReferenceIndexTerm( "org.drools.workbench.screens.enums.backend.server.indexing.classes.Applicant", ResourceType.JAVA ) )
+            final Query query = new SingleTermQueryBuilder(new ValueReferenceIndexTerm("org.drools.workbench.screens.enums.backend.server.indexing.classes.Applicant",
+                                                                                       ResourceType.JAVA))
                     .build();
-            searchFor(index, query, 2, path1, path2);
+            searchFor(query,
+                      2,
+                      path1,
+                      path2);
         }
 
         //Enumerations using org.drools.workbench.screens.enums.backend.server.indexing.classes.Mortgage
         {
-            final Query query = new SingleTermQueryBuilder( new ValueReferenceIndexTerm( "org.drools.workbench.screens.enums.backend.server.indexing.classes.Mortgage", ResourceType.JAVA ) )
+            final Query query = new SingleTermQueryBuilder(new ValueReferenceIndexTerm("org.drools.workbench.screens.enums.backend.server.indexing.classes.Mortgage",
+                                                                                       ResourceType.JAVA))
                     .build();
-            searchFor(index, query, 1, path2);
+            searchFor(query,
+                      1,
+                      path2);
         }
 
         //Enumerations using org.drools.workbench.screens.enums.backend.server.indexing.classes.Mortgage#amount
         {
-            final Query query = new SingleTermQueryBuilder( new ValuePartReferenceIndexTerm( "org.drools.workbench.screens.enums.backend.server.indexing.classes.Mortgage", "amount", PartType.FIELD ) )
+            final Query query = new SingleTermQueryBuilder(new ValuePartReferenceIndexTerm("org.drools.workbench.screens.enums.backend.server.indexing.classes.Mortgage",
+                                                                                           "amount",
+                                                                                           PartType.FIELD))
                     .build();
-            searchFor(index, query, 1, path2);
+            searchFor(query,
+                      1,
+                      path2);
         }
 
         //Enumerations using java.lang.Integer
         {
-            final Query query = new SingleTermQueryBuilder( new ValueReferenceIndexTerm( "java.lang.Integer", ResourceType.JAVA ) )
+            final Query query = new SingleTermQueryBuilder(new ValueReferenceIndexTerm("java.lang.Integer",
+                                                                                       ResourceType.JAVA))
                     .build();
-            searchFor(index, query, 2, path1, path2);
+            searchFor(query,
+                      2,
+                      path1,
+                      path2);
         }
-
     }
 
     @Override
@@ -97,5 +108,4 @@ public class IndexEnumEntriesTest extends BaseIndexingTest<EnumResourceTypeDefin
     protected String getRepositoryName() {
         return this.getClass().getSimpleName();
     }
-
 }

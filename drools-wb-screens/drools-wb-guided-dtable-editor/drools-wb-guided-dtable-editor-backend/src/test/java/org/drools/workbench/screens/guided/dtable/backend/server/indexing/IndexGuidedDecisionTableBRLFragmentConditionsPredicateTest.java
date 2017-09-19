@@ -29,7 +29,6 @@ import org.kie.workbench.common.services.refactoring.backend.server.TestIndexer;
 import org.kie.workbench.common.services.refactoring.backend.server.query.builder.SingleTermQueryBuilder;
 import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueReferenceIndexTerm;
 import org.kie.workbench.common.services.refactoring.service.ResourceType;
-import org.uberfire.ext.metadata.engine.Index;
 import org.uberfire.java.nio.file.Path;
 
 public class IndexGuidedDecisionTableBRLFragmentConditionsPredicateTest extends BaseIndexingTest<GuidedDTableResourceTypeDefinition> {
@@ -50,14 +49,12 @@ public class IndexGuidedDecisionTableBRLFragmentConditionsPredicateTest extends 
 
         Thread.sleep(7500); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
 
-        final Index index = getConfig().getIndexManager().get(org.uberfire.ext.metadata.io.KObjectUtil.toKCluster(basePath.getFileSystem()));
 
         {
             final Query query = new SingleTermQueryBuilder(new ValueReferenceIndexTerm("org.drools.workbench.screens.guided.dtable.backend.server.indexing.classes.Applicant",
                                                                                        ResourceType.JAVA))
                     .build();
-            searchFor(index,
-                      query,
+            searchFor(query,
                       1,
                       path);
         }

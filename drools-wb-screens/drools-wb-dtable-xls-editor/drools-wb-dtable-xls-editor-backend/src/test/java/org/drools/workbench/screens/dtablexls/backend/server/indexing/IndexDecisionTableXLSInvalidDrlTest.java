@@ -16,15 +16,13 @@
 
 package org.drools.workbench.screens.dtablexls.backend.server.indexing;
 
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.Appender;
 import org.apache.commons.io.IOUtils;
 import org.apache.lucene.search.Query;
 import org.drools.workbench.screens.dtablexls.type.DecisionTableXLSResourceTypeDefinition;
@@ -36,46 +34,42 @@ import org.kie.workbench.common.services.refactoring.model.index.terms.valueterm
 import org.kie.workbench.common.services.refactoring.service.PartType;
 import org.mockito.ArgumentMatcher;
 import org.slf4j.LoggerFactory;
-import org.uberfire.ext.metadata.engine.Index;
 import org.uberfire.java.nio.file.Path;
 
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.Appender;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.*;
 
 public class IndexDecisionTableXLSInvalidDrlTest extends BaseIndexingTest<DecisionTableXLSResourceTypeDefinition> {
 
     @Test
     public void testIndexDecisionTableXLSInvalidDrl() throws IOException, InterruptedException {
         //Setup logging
-        final Logger root = (Logger) LoggerFactory.getLogger( Logger.ROOT_LOGGER_NAME );
-        final Appender<ILoggingEvent> mockAppender = mock( Appender.class );
-        when( mockAppender.getName() ).thenReturn( "MOCK" );
-        root.addAppender( mockAppender );
+        final Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        final Appender<ILoggingEvent> mockAppender = mock(Appender.class);
+        when(mockAppender.getName()).thenReturn("MOCK");
+        root.addAppender(mockAppender);
 
         //Add test files
-        loadXLSFile( basePath,
-                     "bz1269366.xls" );
+        loadXLSFile(basePath,
+                    "bz1269366.xls");
 
-        Thread.sleep( 5000 ); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
-
-        final Index index = getConfig().getIndexManager().get( org.uberfire.ext.metadata.io.KObjectUtil.toKCluster( basePath.getFileSystem() ) );
+        Thread.sleep(5000); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
 
         {
-            final Query query = new SingleTermQueryBuilder( new ValueSharedPartIndexTerm( "myRuleFlowGroup", PartType.RULEFLOW_GROUP ) )
+            final Query query = new SingleTermQueryBuilder(new ValueSharedPartIndexTerm("myRuleFlowGroup",
+                                                                                        PartType.RULEFLOW_GROUP))
                     .build();
-            searchFor(index, query, 0);
+            searchFor(query,
+                      0);
 
-            verify( mockAppender ).doAppend( argThat( new ArgumentMatcher<ILoggingEvent>() {
+            verify(mockAppender).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
 
                 @Override
-                public boolean matches( final Object argument ) {
-                    return ( (ILoggingEvent) argument ).getMessage().startsWith( "Unable to parse DRL" );
+                public boolean matches(final Object argument) {
+                    return ((ILoggingEvent) argument).getMessage().startsWith("Unable to parse DRL");
                 }
-
-            } ) );
+            }));
         }
-
     }
 
     @Override
@@ -93,16 +87,15 @@ public class IndexDecisionTableXLSInvalidDrlTest extends BaseIndexingTest<Decisi
         return this.getClass().getSimpleName();
     }
 
-    private Path loadXLSFile( final Path basePath,
-                              final String fileName ) throws IOException {
-        final Path path = basePath.resolve( fileName );
-        final InputStream is = this.getClass().getResourceAsStream( fileName );
-        final OutputStream os = ioService().newOutputStream( path );
-        IOUtils.copy( is,
-                      os );
+    private Path loadXLSFile(final Path basePath,
+                             final String fileName) throws IOException {
+        final Path path = basePath.resolve(fileName);
+        final InputStream is = this.getClass().getResourceAsStream(fileName);
+        final OutputStream os = ioService().newOutputStream(path);
+        IOUtils.copy(is,
+                     os);
         os.flush();
         os.close();
         return path;
     }
-
 }

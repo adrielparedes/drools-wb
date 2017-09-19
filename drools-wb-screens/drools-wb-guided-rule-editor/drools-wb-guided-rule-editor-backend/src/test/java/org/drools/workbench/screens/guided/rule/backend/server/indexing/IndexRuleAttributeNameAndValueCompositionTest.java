@@ -26,7 +26,6 @@ import org.kie.workbench.common.services.refactoring.backend.server.TestIndexer;
 import org.kie.workbench.common.services.refactoring.backend.server.query.builder.SingleTermQueryBuilder;
 import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueSharedPartIndexTerm;
 import org.kie.workbench.common.services.refactoring.service.PartType;
-import org.uberfire.ext.metadata.engine.Index;
 import org.uberfire.java.nio.file.Path;
 
 public class IndexRuleAttributeNameAndValueCompositionTest extends BaseIndexingTest<GuidedRuleDRLResourceTypeDefinition> {
@@ -34,30 +33,32 @@ public class IndexRuleAttributeNameAndValueCompositionTest extends BaseIndexingT
     @Test
     public void testIndexDrlRuleAttributeNameAndValues() throws IOException, InterruptedException {
         //Add test files
-        final Path path = basePath.resolve( "drl1.rdrl" );
-        final String drl = loadText( "drl1.rdrl" );
-        ioService().write( path,
-                           drl );
+        final Path path = basePath.resolve("drl1.rdrl");
+        final String drl = loadText("drl1.rdrl");
+        ioService().write(path,
+                          drl);
 
-        Thread.sleep( 5000 ); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
-
-        final Index index = getConfig().getIndexManager().get( org.uberfire.ext.metadata.io.KObjectUtil.toKCluster( basePath.getFileSystem() ) );
+        Thread.sleep(5000); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
 
         //DRL defining a RuleFlow-Group named myRuleFlowGroup. This should match drl5.drl
         //This checks whether there is a Rule Attribute "ruleflow-group" and its Value is "myRuleflowGroup"
         {
-            final Query query = new SingleTermQueryBuilder( new ValueSharedPartIndexTerm( "myRuleFlowGroup", PartType.RULEFLOW_GROUP) )
+            final Query query = new SingleTermQueryBuilder(new ValueSharedPartIndexTerm("myRuleFlowGroup",
+                                                                                        PartType.RULEFLOW_GROUP))
                     .build();
-            searchFor(index, query, 1, path);
+            searchFor(query,
+                      1,
+                      path);
         }
 
         //DRL defining a RuleFlow-Group named myAgendaGroup. This should *NOT* match drl5.drl
         {
-            final Query query = new SingleTermQueryBuilder( new ValueSharedPartIndexTerm( "myAgendaGroup", PartType.RULEFLOW_GROUP) )
+            final Query query = new SingleTermQueryBuilder(new ValueSharedPartIndexTerm("myAgendaGroup",
+                                                                                        PartType.RULEFLOW_GROUP))
                     .build();
-            searchFor(index, query, 0);
+            searchFor(query,
+                      0);
         }
-
     }
 
     @Override
@@ -74,5 +75,4 @@ public class IndexRuleAttributeNameAndValueCompositionTest extends BaseIndexingT
     protected String getRepositoryName() {
         return this.getClass().getSimpleName();
     }
-
 }

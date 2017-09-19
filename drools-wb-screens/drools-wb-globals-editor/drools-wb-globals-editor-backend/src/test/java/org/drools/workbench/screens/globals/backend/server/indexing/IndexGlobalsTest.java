@@ -26,7 +26,6 @@ import org.kie.workbench.common.services.refactoring.backend.server.TestIndexer;
 import org.kie.workbench.common.services.refactoring.backend.server.query.builder.SingleTermQueryBuilder;
 import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueReferenceIndexTerm;
 import org.kie.workbench.common.services.refactoring.service.ResourceType;
-import org.uberfire.ext.metadata.engine.Index;
 import org.uberfire.java.nio.file.Path;
 
 public class IndexGlobalsTest extends BaseIndexingTest<GlobalResourceTypeDefinition> {
@@ -34,23 +33,25 @@ public class IndexGlobalsTest extends BaseIndexingTest<GlobalResourceTypeDefinit
     @Test
     public void testIndexGlobals() throws IOException, InterruptedException {
         //Add test files
-        final Path path1 = basePath.resolve( "global1.gdrl" );
-        final String drl1 = loadText( "global1.gdrl" );
-        ioService().write( path1,
-                           drl1 );
-        final Path path2 = basePath.resolve( "global2.gdrl" );
-        final String drl2 = loadText( "global2.gdrl" );
-        ioService().write( path2,
-                           drl2 );
+        final Path path1 = basePath.resolve("global1.gdrl");
+        final String drl1 = loadText("global1.gdrl");
+        ioService().write(path1,
+                          drl1);
+        final Path path2 = basePath.resolve("global2.gdrl");
+        final String drl2 = loadText("global2.gdrl");
+        ioService().write(path2,
+                          drl2);
 
-        Thread.sleep( 5000 ); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
-
-        final Index index = getConfig().getIndexManager().get( org.uberfire.ext.metadata.io.KObjectUtil.toKCluster( basePath.getFileSystem() ) );
+        Thread.sleep(5000); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
 
         {
-            final Query query = new SingleTermQueryBuilder( new ValueReferenceIndexTerm( "java.util.ArrayList", ResourceType.JAVA ) )
+            final Query query = new SingleTermQueryBuilder(new ValueReferenceIndexTerm("java.util.ArrayList",
+                                                                                       ResourceType.JAVA))
                     .build();
-            searchFor(index, query, 2, path1, path2);
+            searchFor(query,
+                      2,
+                      path1,
+                      path2);
         }
     }
 
@@ -68,5 +69,4 @@ public class IndexGlobalsTest extends BaseIndexingTest<GlobalResourceTypeDefinit
     protected String getRepositoryName() {
         return this.getClass().getSimpleName();
     }
-
 }

@@ -39,8 +39,15 @@
   <logger name="org.uberfire.backend">
     <level value="DEBUG"/>
   </logger>
+
+  <logger name="org.apache.lucene">
+    <level value="DEBUG"/>
+  </logger>
+  <logger name="org.hibernate.search">
+    <level value="DEBUG"/>
+  </logger>
   <root>
-    <priority value="ERROR"/>
+    <priority value="DEBUG"/>
     <appender-ref ref="CONSOLE"/>
   </root>
 </log4j:configuration>

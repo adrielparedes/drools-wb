@@ -25,11 +25,8 @@ import org.kie.workbench.common.services.refactoring.backend.server.BaseIndexing
 import org.kie.workbench.common.services.refactoring.backend.server.TestIndexer;
 import org.kie.workbench.common.services.refactoring.backend.server.query.builder.SingleTermQueryBuilder;
 import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueIndexTerm.TermSearchType;
-import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueReferenceIndexTerm;
 import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueResourceIndexTerm;
 import org.kie.workbench.common.services.refactoring.service.ResourceType;
-import org.uberfire.ext.metadata.engine.Index;
-import org.uberfire.ext.metadata.io.KObjectUtil;
 import org.uberfire.java.nio.file.Path;
 
 public class IndexRuleTest extends BaseIndexingTest<GuidedDTreeResourceTypeDefinition> {
@@ -37,19 +34,20 @@ public class IndexRuleTest extends BaseIndexingTest<GuidedDTreeResourceTypeDefin
     @Test
     public void testIndexDrlRules() throws IOException, InterruptedException {
         //Add test files
-        final Path path = basePath.resolve( "drl1.tdrl" );
-        final String drl = loadText( "drl1.tdrl" );
-        ioService().write( path,
-                           drl );
+        final Path path = basePath.resolve("drl1.tdrl");
+        final String drl = loadText("drl1.tdrl");
+        ioService().write(path,
+                          drl);
 
-        Thread.sleep( 5000 ); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
-
-        final Index index = getConfig().getIndexManager().get( KObjectUtil.toKCluster( basePath.getFileSystem() ) );
+        Thread.sleep(5000); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
 
         {
-            final Query query = new SingleTermQueryBuilder( new ValueResourceIndexTerm( "*myRule", ResourceType.RULE, TermSearchType.WILDCARD ) )
+            final Query query = new SingleTermQueryBuilder(new ValueResourceIndexTerm("*myRule",
+                                                                                      ResourceType.RULE,
+                                                                                      TermSearchType.WILDCARD))
                     .build();
-            searchFor(index, query, 1);
+            searchFor(query,
+                      1);
         }
     }
 
@@ -67,5 +65,4 @@ public class IndexRuleTest extends BaseIndexingTest<GuidedDTreeResourceTypeDefin
     protected String getRepositoryName() {
         return this.getClass().getSimpleName();
     }
-
 }

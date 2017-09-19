@@ -32,7 +32,6 @@ import org.kie.workbench.common.services.refactoring.model.index.terms.valueterm
 import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueReferenceIndexTerm;
 import org.kie.workbench.common.services.refactoring.service.PartType;
 import org.kie.workbench.common.services.refactoring.service.ResourceType;
-import org.uberfire.ext.metadata.engine.Index;
 import org.uberfire.java.nio.file.Path;
 
 public class IndexTestScenarioTest extends BaseIndexingTest<TestScenarioResourceTypeDefinition> {
@@ -85,47 +84,46 @@ public class IndexTestScenarioTest extends BaseIndexingTest<TestScenarioResource
 
         Thread.sleep( 5000 ); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
 
-        final Index index = getConfig().getIndexManager().get( org.uberfire.ext.metadata.io.KObjectUtil.toKCluster( basePath.getFileSystem() ) );
 
         //Test Scenarios using org.drools.workbench.screens.testscenario.backend.server.indexing.classes.Applicant
         {
             final Query query = new SingleTermQueryBuilder( new ValueReferenceIndexTerm( "org.drools.workbench.screens.testscenario.backend.server.indexing.classes.Applicant", ResourceType.JAVA ) )
                     .build();
-            searchFor(index, query, 2, path1, path2);
+            searchFor( query, 2, path1, path2);
         }
 
         //Test Scenarios using org.drools.workbench.screens.testscenario.backend.server.indexing.classes.Mortgage
         {
             final Query query = new SingleTermQueryBuilder( new ValueReferenceIndexTerm( "org.drools.workbench.screens.testscenario.backend.server.indexing.classes.Mortgage", ResourceType.JAVA ) )
                     .build();
-            searchFor(index, query, 1, path1);
+            searchFor( query, 1, path1);
         }
 
         //Test Scenarios using org.drools.workbench.screens.testscenario.backend.server.indexing.classes.Mortgage#amount
         {
             final Query query = new SingleTermQueryBuilder( new ValuePartReferenceIndexTerm( "org.drools.workbench.screens.testscenario.backend.server.indexing.classes.Mortgage", "amount", PartType.FIELD ) )
                     .build();
-            searchFor(index, query, 1, path1);
+            searchFor( query, 1, path1);
         }
 
         //Test Scenarios using java.lang.Integer
         {
             final Query query = new SingleTermQueryBuilder( new ValueReferenceIndexTerm( "java.lang.Integer", ResourceType.JAVA ) )
                     .build();
-            searchFor(index, query, 3, path1, path2);
+            searchFor( query, 3, path1, path2);
         }
 
         //Test Scenarios expecting rule "test" to fire
         {
             final Query query = new SingleTermQueryBuilder( new ValueReferenceIndexTerm( "test", ResourceType.RULE ) )
                     .build();
-            searchFor(index, query, 1, path3);
+            searchFor( query, 1, path3);
         }
 
         {
             final Query query = new SingleTermQueryBuilder( new ValueReferenceIndexTerm( "java.util.Date", ResourceType.JAVA ) )
                     .build();
-            searchFor(index, query, 1, path4);
+            searchFor( query, 1, path4);
         }
     }
 

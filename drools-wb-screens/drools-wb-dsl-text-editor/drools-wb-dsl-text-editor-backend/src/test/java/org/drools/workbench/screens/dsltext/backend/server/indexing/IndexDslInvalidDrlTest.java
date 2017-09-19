@@ -45,36 +45,34 @@ public class IndexDslInvalidDrlTest extends BaseIndexingTest<DSLResourceTypeDefi
     @Test
     public void testIndexDslInvalidDrl() throws IOException, InterruptedException {
         //Setup logging
-        final Logger root = (Logger) LoggerFactory.getLogger( Logger.ROOT_LOGGER_NAME );
-        final Appender<ILoggingEvent> mockAppender = mock( Appender.class );
-        when( mockAppender.getName() ).thenReturn( "MOCK" );
-        root.addAppender( mockAppender );
+        final Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
+        final Appender<ILoggingEvent> mockAppender = mock(Appender.class);
+        when(mockAppender.getName()).thenReturn("MOCK");
+        root.addAppender(mockAppender);
 
         //Add test files
-        final Path path = basePath.resolve( "bz1269366.dsl" );
-        final String dsl = loadText( "bz1269366.dsl" );
-        ioService().write( path,
-                           dsl );
+        final Path path = basePath.resolve("bz1269366.dsl");
+        final String dsl = loadText("bz1269366.dsl");
+        ioService().write(path,
+                          dsl);
 
-        Thread.sleep( 5000 ); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
-
-        final Index index = getConfig().getIndexManager().get( org.uberfire.ext.metadata.io.KObjectUtil.toKCluster( basePath.getFileSystem() ) );
+        Thread.sleep(5000); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
 
         {
-            final Query query = new SingleTermQueryBuilder( new ValueReferenceIndexTerm( "org.drools.workbench.screens.dsltext.backend.server.indexing.classes.Applicant", ResourceType.JAVA ) )
+            final Query query = new SingleTermQueryBuilder(new ValueReferenceIndexTerm("org.drools.workbench.screens.dsltext.backend.server.indexing.classes.Applicant",
+                                                                                       ResourceType.JAVA))
                     .build();
-            searchFor(index, query, 0);
+            searchFor(query,
+                      0);
 
-            verify( mockAppender ).doAppend( argThat( new ArgumentMatcher<ILoggingEvent>() {
+            verify(mockAppender).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
 
                 @Override
-                public boolean matches( final Object argument ) {
-                    return ( (ILoggingEvent) argument ).getMessage().startsWith( "Unable to parse DRL" );
+                public boolean matches(final Object argument) {
+                    return ((ILoggingEvent) argument).getMessage().startsWith("Unable to parse DRL");
                 }
-
-            } ) );
+            }));
         }
-
     }
 
     @Override
@@ -91,5 +89,4 @@ public class IndexDslInvalidDrlTest extends BaseIndexingTest<DSLResourceTypeDefi
     protected String getRepositoryName() {
         return this.getClass().getSimpleName();
     }
-
 }

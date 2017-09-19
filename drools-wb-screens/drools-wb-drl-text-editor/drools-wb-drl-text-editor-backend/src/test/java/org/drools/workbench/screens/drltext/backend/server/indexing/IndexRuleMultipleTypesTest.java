@@ -30,8 +30,7 @@ import org.kie.workbench.common.services.refactoring.backend.server.query.builde
 import org.kie.workbench.common.services.refactoring.model.index.terms.ProjectRootPathIndexTerm;
 import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueReferenceIndexTerm;
 import org.kie.workbench.common.services.refactoring.service.ResourceType;
-import org.uberfire.ext.metadata.backend.lucene.analyzer.FilenameAnalyzer;
-import org.uberfire.ext.metadata.engine.Index;
+import org.uberfire.ext.metadata.backend.hibernate.analyzer.FilenameAnalyzer;
 import org.uberfire.java.nio.file.Path;
 
 public class IndexRuleMultipleTypesTest extends BaseIndexingTest<DRLResourceTypeDefinition> {
@@ -50,18 +49,17 @@ public class IndexRuleMultipleTypesTest extends BaseIndexingTest<DRLResourceType
 
         Thread.sleep( 5000 ); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
 
-        final Index index = getConfig().getIndexManager().get( org.uberfire.ext.metadata.io.KObjectUtil.toKCluster( basePath.getFileSystem() ) );
 
         {
             final Query query = new SingleTermQueryBuilder( new ValueReferenceIndexTerm( "org.drools.workbench.screens.drltext.backend.server.indexing.classes.Applicant", ResourceType.JAVA ) )
                     .build();
-            searchFor(index, query, 2, path1, path2);
+            searchFor( query, 2, path1, path2);
         }
 
         {
             final Query query = new SingleTermQueryBuilder( new ValueReferenceIndexTerm( "org.drools.workbench.screens.drltext.backend.server.indexing.classes.Mortgage", ResourceType.JAVA ) )
                     .build();
-            searchFor(index, query, 1, path2);
+            searchFor( query, 1, path2);
         }
 
     }

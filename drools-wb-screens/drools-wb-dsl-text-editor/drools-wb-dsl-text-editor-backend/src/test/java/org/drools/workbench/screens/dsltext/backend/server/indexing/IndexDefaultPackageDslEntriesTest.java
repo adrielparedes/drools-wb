@@ -32,8 +32,7 @@ import org.kie.workbench.common.services.refactoring.model.index.terms.valueterm
 import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueReferenceIndexTerm;
 import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueResourceIndexTerm;
 import org.kie.workbench.common.services.refactoring.service.ResourceType;
-import org.uberfire.ext.metadata.backend.lucene.analyzer.FilenameAnalyzer;
-import org.uberfire.ext.metadata.engine.Index;
+import org.uberfire.ext.metadata.backend.hibernate.analyzer.FilenameAnalyzer;
 import org.uberfire.java.nio.file.Path;
 
 public class IndexDefaultPackageDslEntriesTest extends BaseIndexingTest<DSLResourceTypeDefinition> {
@@ -48,15 +47,12 @@ public class IndexDefaultPackageDslEntriesTest extends BaseIndexingTest<DSLResou
 
         Thread.sleep(5000); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
 
-        final Index index = getConfig().getIndexManager().get(org.uberfire.ext.metadata.io.KObjectUtil.toKCluster(basePath.getFileSystem()));
-
         {
             final Query query = new SingleTermQueryBuilder(new ValueResourceIndexTerm("*",
                                                                                       ResourceType.RULE,
                                                                                       TermSearchType.WILDCARD))
                     .build();
-            searchFor(index,
-                      query,
+            searchFor(query,
                       0);
         }
 
@@ -64,8 +60,7 @@ public class IndexDefaultPackageDslEntriesTest extends BaseIndexingTest<DSLResou
             final Query query = new SingleTermQueryBuilder(new ValueReferenceIndexTerm("org.drools.workbench.screens.dsltext.backend.server.indexing.classes.Applicant",
                                                                                        ResourceType.JAVA))
                     .build();
-            searchFor(index,
-                      query,
+            searchFor(query,
                       1,
                       path1);
         }

@@ -29,7 +29,6 @@ import org.kie.workbench.common.services.refactoring.backend.server.TestIndexer;
 import org.kie.workbench.common.services.refactoring.backend.server.query.builder.SingleTermQueryBuilder;
 import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueReferenceIndexTerm;
 import org.kie.workbench.common.services.refactoring.service.ResourceType;
-import org.uberfire.ext.metadata.engine.Index;
 import org.uberfire.java.nio.file.Path;
 
 public class IndexDecisionTableXLSMultipleTypesTest extends BaseIndexingTest<DecisionTableXLSResourceTypeDefinition> {
@@ -37,26 +36,31 @@ public class IndexDecisionTableXLSMultipleTypesTest extends BaseIndexingTest<Dec
     @Test
     public void testIndexDecisionTableXLSMultipleTypes() throws IOException, InterruptedException {
         //Add test files
-        final Path path1 = loadXLSFile( basePath,
-                                        "dtable1.xls" );
-        final Path path2 = loadXLSFile( basePath,
-                                        "dtable2.xls" );
+        final Path path1 = loadXLSFile(basePath,
+                                       "dtable1.xls");
+        final Path path2 = loadXLSFile(basePath,
+                                       "dtable2.xls");
 
-        Thread.sleep( 5000 ); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
-
-        final Index index = getConfig().getIndexManager().get( org.uberfire.ext.metadata.io.KObjectUtil.toKCluster( basePath.getFileSystem() ) );
+        Thread.sleep(5000); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
 
         {
-            final Query query = new SingleTermQueryBuilder( new ValueReferenceIndexTerm( "org.drools.workbench.screens.dtablexls.backend.server.indexing.classes.Applicant", ResourceType.JAVA ) )
+            final Query query = new SingleTermQueryBuilder(new ValueReferenceIndexTerm("org.drools.workbench.screens.dtablexls.backend.server.indexing.classes.Applicant",
+                                                                                       ResourceType.JAVA))
                     .build();
-            searchFor(index, query, 2, path1, path2);
+            searchFor(query,
+                      2,
+                      path1,
+                      path2);
         }
 
         {
-            final Query query = new SingleTermQueryBuilder( new ValueReferenceIndexTerm( "org.drools.workbench.screens.dtablexls.backend.server.indexing.classes.Mortgage", ResourceType.JAVA ) )
+            final Query query = new SingleTermQueryBuilder(new ValueReferenceIndexTerm("org.drools.workbench.screens.dtablexls.backend.server.indexing.classes.Mortgage",
+                                                                                       ResourceType.JAVA))
                     .build();
             // Mortgage import statement in both .xls files
-            searchFor(index, query, 2, path2);
+            searchFor(query,
+                      2,
+                      path2);
         }
     }
 
@@ -75,16 +79,15 @@ public class IndexDecisionTableXLSMultipleTypesTest extends BaseIndexingTest<Dec
         return this.getClass().getSimpleName();
     }
 
-    private Path loadXLSFile( final Path basePath,
-                              final String fileName ) throws IOException {
-        final Path path = basePath.resolve( fileName );
-        final InputStream is = this.getClass().getResourceAsStream( fileName );
-        final OutputStream os = ioService().newOutputStream( path );
-        IOUtils.copy( is,
-                      os );
+    private Path loadXLSFile(final Path basePath,
+                             final String fileName) throws IOException {
+        final Path path = basePath.resolve(fileName);
+        final InputStream is = this.getClass().getResourceAsStream(fileName);
+        final OutputStream os = ioService().newOutputStream(path);
+        IOUtils.copy(is,
+                     os);
         os.flush();
         os.close();
         return path;
     }
-
 }

@@ -27,8 +27,6 @@ import org.kie.workbench.common.services.refactoring.backend.server.query.builde
 import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueIndexTerm.TermSearchType;
 import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueReferenceIndexTerm;
 import org.kie.workbench.common.services.refactoring.service.ResourceType;
-import org.uberfire.ext.metadata.engine.Index;
-import org.uberfire.ext.metadata.io.KObjectUtil;
 import org.uberfire.java.nio.file.Path;
 
 public class IndexRuleTypeTest extends BaseIndexingTest<GuidedDTreeResourceTypeDefinition> {
@@ -36,31 +34,33 @@ public class IndexRuleTypeTest extends BaseIndexingTest<GuidedDTreeResourceTypeD
     @Test
     public void testIndexRuleTypes() throws IOException, InterruptedException {
         //Add test files
-        final Path path1 = basePath.resolve( "drl1.tdrl" );
-        final String drl1 = loadText( "drl1.tdrl" );
-        ioService().write( path1,
-                           drl1 );
-        final Path path2 = basePath.resolve( "drl2.tdrl" );
-        final String drl2 = loadText( "drl2.tdrl" );
-        ioService().write( path2,
-                           drl2 );
+        final Path path1 = basePath.resolve("drl1.tdrl");
+        final String drl1 = loadText("drl1.tdrl");
+        ioService().write(path1,
+                          drl1);
+        final Path path2 = basePath.resolve("drl2.tdrl");
+        final String drl2 = loadText("drl2.tdrl");
+        ioService().write(path2,
+                          drl2);
 
-        Thread.sleep( 5000 ); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
-
-        final Index index = getConfig().getIndexManager().get( KObjectUtil.toKCluster( basePath.getFileSystem() ) );
+        Thread.sleep(5000); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
 
         {
-            final Query query = new SingleTermQueryBuilder( new ValueReferenceIndexTerm( "org.drools.workbench.screens.guided.dtree.backend.server.indexing.classes.Applicant", ResourceType.JAVA ) )
+            final Query query = new SingleTermQueryBuilder(new ValueReferenceIndexTerm("org.drools.workbench.screens.guided.dtree.backend.server.indexing.classes.Applicant",
+                                                                                       ResourceType.JAVA))
                     .build();
-            searchFor(index, query, 2);
+            searchFor(query,
+                      2);
         }
 
         {
-            final Query query = new SingleTermQueryBuilder( new ValueReferenceIndexTerm( "*.Applicant", ResourceType.JAVA, TermSearchType.WILDCARD ) )
+            final Query query = new SingleTermQueryBuilder(new ValueReferenceIndexTerm("*.Applicant",
+                                                                                       ResourceType.JAVA,
+                                                                                       TermSearchType.WILDCARD))
                     .build();
-            searchFor(index, query, 2);
+            searchFor(query,
+                      2);
         }
-
     }
 
     @Override
@@ -77,5 +77,4 @@ public class IndexRuleTypeTest extends BaseIndexingTest<GuidedDTreeResourceTypeD
     protected String getRepositoryName() {
         return this.getClass().getSimpleName();
     }
-
 }

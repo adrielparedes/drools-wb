@@ -31,9 +31,7 @@ import org.kie.workbench.common.services.refactoring.model.index.terms.ProjectRo
 import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueIndexTerm.TermSearchType;
 import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueReferenceIndexTerm;
 import org.kie.workbench.common.services.refactoring.service.ResourceType;
-import org.uberfire.ext.metadata.backend.lucene.analyzer.FilenameAnalyzer;
-import org.uberfire.ext.metadata.engine.Index;
-import org.uberfire.ext.metadata.io.KObjectUtil;
+import org.uberfire.ext.metadata.backend.hibernate.analyzer.FilenameAnalyzer;
 import org.uberfire.java.nio.file.Path;
 
 public class IndexRuleTypeTest extends BaseIndexingTest<DRLResourceTypeDefinition> {
@@ -41,31 +39,33 @@ public class IndexRuleTypeTest extends BaseIndexingTest<DRLResourceTypeDefinitio
     @Test
     public void testIndexRuleTypes() throws IOException, InterruptedException {
         //Add test files
-        final Path path1 = basePath.resolve( "drl1.drl" );
-        final String drl1 = loadText( "drl1.drl" );
-        ioService().write( path1,
-                           drl1 );
-        final Path path2 = basePath.resolve( "drl2.drl" );
-        final String drl2 = loadText( "drl2.drl" );
-        ioService().write( path2,
-                           drl2 );
+        final Path path1 = basePath.resolve("drl1.drl");
+        final String drl1 = loadText("drl1.drl");
+        ioService().write(path1,
+                          drl1);
+        final Path path2 = basePath.resolve("drl2.drl");
+        final String drl2 = loadText("drl2.drl");
+        ioService().write(path2,
+                          drl2);
 
-        Thread.sleep( 5000 ); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
-
-        final Index index = getConfig().getIndexManager().get( KObjectUtil.toKCluster( basePath.getFileSystem() ) );
+        Thread.sleep(5000); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
 
         {
-            final Query query = new SingleTermQueryBuilder( new ValueReferenceIndexTerm( "org.drools.workbench.screens.drltext.backend.server.indexing.classes.Applicant", ResourceType.JAVA ) )
+            final Query query = new SingleTermQueryBuilder(new ValueReferenceIndexTerm("org.drools.workbench.screens.drltext.backend.server.indexing.classes.Applicant",
+                                                                                       ResourceType.JAVA))
                     .build();
-            searchFor(index, query, 2);
+            searchFor(query,
+                      2);
         }
 
         {
-            final Query query = new SingleTermQueryBuilder( new ValueReferenceIndexTerm( "*.Applicant", ResourceType.JAVA, TermSearchType.WILDCARD ) )
+            final Query query = new SingleTermQueryBuilder(new ValueReferenceIndexTerm("*.Applicant",
+                                                                                       ResourceType.JAVA,
+                                                                                       TermSearchType.WILDCARD))
                     .build();
-            searchFor(index, query, 2);
+            searchFor(query,
+                      2);
         }
-
     }
 
     @Override
@@ -73,12 +73,12 @@ public class IndexRuleTypeTest extends BaseIndexingTest<DRLResourceTypeDefinitio
         return new TestDrlFileIndexer();
     }
 
-
     @Override
     public Map<String, Analyzer> getAnalyzers() {
         return new HashMap<String, Analyzer>() {
             {
-                put( ProjectRootPathIndexTerm.TERM, new FilenameAnalyzer() );
+                put(ProjectRootPathIndexTerm.TERM,
+                    new FilenameAnalyzer());
             }
         };
     }
@@ -92,5 +92,4 @@ public class IndexRuleTypeTest extends BaseIndexingTest<DRLResourceTypeDefinitio
     protected String getRepositoryName() {
         return this.getClass().getSimpleName();
     }
-
 }

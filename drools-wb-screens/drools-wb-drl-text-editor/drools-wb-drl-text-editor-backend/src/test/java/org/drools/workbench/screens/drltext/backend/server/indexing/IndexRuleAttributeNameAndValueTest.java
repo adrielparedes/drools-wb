@@ -17,10 +17,7 @@
 package org.drools.workbench.screens.drltext.backend.server.indexing;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
-import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
@@ -29,14 +26,10 @@ import org.drools.workbench.screens.drltext.type.DRLResourceTypeDefinition;
 import org.junit.Test;
 import org.kie.workbench.common.services.refactoring.backend.server.BaseIndexingTest;
 import org.kie.workbench.common.services.refactoring.backend.server.TestIndexer;
-import org.kie.workbench.common.services.refactoring.model.index.terms.ProjectRootPathIndexTerm;
 import org.kie.workbench.common.services.refactoring.model.index.terms.SharedPartIndexTerm;
 import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueIndexTerm;
 import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueSharedPartIndexTerm;
 import org.kie.workbench.common.services.refactoring.service.PartType;
-import org.uberfire.ext.metadata.backend.lucene.analyzer.FilenameAnalyzer;
-import org.uberfire.ext.metadata.engine.Index;
-import org.uberfire.ext.metadata.io.KObjectUtil;
 import org.uberfire.java.nio.file.Path;
 
 public class IndexRuleAttributeNameAndValueTest extends BaseIndexingTest<DRLResourceTypeDefinition> {
@@ -44,22 +37,22 @@ public class IndexRuleAttributeNameAndValueTest extends BaseIndexingTest<DRLReso
     @Test
     public void testIndexDrlRuleAttributeNameAndValue() throws IOException, InterruptedException {
         //Add test files
-        final Path path = basePath.resolve( "drl1.drl" );
-        final String drl = loadText( "drl1.drl" );
-        ioService().write( path,
-                           drl );
+        final Path path = basePath.resolve("drl1.drl");
+        final String drl = loadText("drl1.drl");
+        ioService().write(path,
+                          drl);
 
-        Thread.sleep( 5000 ); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
-
-        final Index index = getConfig().getIndexManager().get( KObjectUtil.toKCluster( basePath.getFileSystem() ) );
+        Thread.sleep(5000); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
 
         {
             final BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
-            queryBuilder.add( new TermQuery( new Term((new SharedPartIndexTerm(PartType.RULEFLOW_GROUP)).getTerm()) ), BooleanClause.Occur.MUST );
-            queryBuilder.add( new TermQuery( new Term("nonexistent") ), BooleanClause.Occur.MUST );
-            searchFor(index, queryBuilder.build(), 0);
+            queryBuilder.add(new TermQuery(new Term((new SharedPartIndexTerm(PartType.RULEFLOW_GROUP)).getTerm())),
+                             BooleanClause.Occur.MUST);
+            queryBuilder.add(new TermQuery(new Term("nonexistent")),
+                             BooleanClause.Occur.MUST);
+            searchFor(queryBuilder.build(),
+                      0);
         }
-
 
         // This note replaces an earlier note, if it doesn't make sense, delete or ignore it.
 
@@ -68,11 +61,14 @@ public class IndexRuleAttributeNameAndValueTest extends BaseIndexingTest<DRLReso
         // documents that match that field (as opposed to the structure we had before).
         {
             final BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
-            ValueIndexTerm termVals = new ValueSharedPartIndexTerm("myruleflowgroup", PartType.RULEFLOW_GROUP);
-            queryBuilder.add( new TermQuery( new Term(termVals.getTerm(), termVals.getValue() )), BooleanClause.Occur.MUST );
-            searchFor(index, queryBuilder.build(), 1);
+            ValueIndexTerm termVals = new ValueSharedPartIndexTerm("myruleflowgroup",
+                                                                   PartType.RULEFLOW_GROUP);
+            queryBuilder.add(new TermQuery(new Term(termVals.getTerm(),
+                                                    termVals.getValue())),
+                             BooleanClause.Occur.MUST);
+            searchFor(queryBuilder.build(),
+                      1);
         }
-
     }
 
     @Override
@@ -89,5 +85,4 @@ public class IndexRuleAttributeNameAndValueTest extends BaseIndexingTest<DRLReso
     protected String getRepositoryName() {
         return this.getClass().getSimpleName();
     }
-
 }

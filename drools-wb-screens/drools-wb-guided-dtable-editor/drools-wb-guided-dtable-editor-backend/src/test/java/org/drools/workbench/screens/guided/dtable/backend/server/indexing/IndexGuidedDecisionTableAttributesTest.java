@@ -30,7 +30,6 @@ import org.kie.workbench.common.services.refactoring.backend.server.TestIndexer;
 import org.kie.workbench.common.services.refactoring.backend.server.query.builder.SingleTermQueryBuilder;
 import org.kie.workbench.common.services.refactoring.model.index.terms.valueterms.ValueSharedPartIndexTerm;
 import org.kie.workbench.common.services.refactoring.service.PartType;
-import org.uberfire.ext.metadata.engine.Index;
 import org.uberfire.java.nio.file.Path;
 
 public class IndexGuidedDecisionTableAttributesTest extends BaseIndexingTest<GuidedDTableResourceTypeDefinition> {
@@ -38,26 +37,27 @@ public class IndexGuidedDecisionTableAttributesTest extends BaseIndexingTest<Gui
     @Test
     public void testIndexGuidedDecisionTableAttributes() throws IOException, InterruptedException {
         //Add test files
-        final Path path = basePath.resolve( "dtable1.gdst" );
-        final GuidedDecisionTable52 model = GuidedDecisionTableFactory.makeTableWithAttributeCol( "org.drools.workbench.screens.guided.dtable.backend.server.indexing",
-                                                                                                  new ArrayList<Import>() {{
-                                                                                                      add( new Import( "org.drools.workbench.screens.guided.dtable.backend.server.indexing.classes.Applicant" ) );
-                                                                                                  }},
-                                                                                                  "dtable1" );
-        final String xml = GuidedDTXMLPersistence.getInstance().marshal( model );
-        ioService().write( path,
-                           xml );
+        final Path path = basePath.resolve("dtable1.gdst");
+        final GuidedDecisionTable52 model = GuidedDecisionTableFactory.makeTableWithAttributeCol("org.drools.workbench.screens.guided.dtable.backend.server.indexing",
+                                                                                                 new ArrayList<Import>() {{
+                                                                                                     add(new Import("org.drools.workbench.screens.guided.dtable.backend.server.indexing.classes.Applicant"));
+                                                                                                 }},
+                                                                                                 "dtable1");
+        final String xml = GuidedDTXMLPersistence.getInstance().marshal(model);
+        ioService().write(path,
+                          xml);
 
-        Thread.sleep( 5000 ); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
-
-        final Index index = getConfig().getIndexManager().get( org.uberfire.ext.metadata.io.KObjectUtil.toKCluster( basePath.getFileSystem() ) );
+        Thread.sleep(5000); //wait for events to be consumed from jgit -> (notify changes -> watcher -> index) -> lucene index
 
         //Decision Table defining a RuleFlow-Group named myRuleFlowGroup. This should match dtable1.gdst
         //This checks whether there is a Rule Attribute "ruleflow-group" and its Value is "myRuleflowGroup"
         {
-            final Query query = new SingleTermQueryBuilder( new ValueSharedPartIndexTerm( "myRuleFlowGroup", PartType.RULEFLOW_GROUP ) )
+            final Query query = new SingleTermQueryBuilder(new ValueSharedPartIndexTerm("myRuleFlowGroup",
+                                                                                        PartType.RULEFLOW_GROUP))
                     .build();
-            searchFor(index, query, 1, path);
+            searchFor(query,
+                      1,
+                      path);
         }
     }
 
@@ -75,5 +75,4 @@ public class IndexGuidedDecisionTableAttributesTest extends BaseIndexingTest<Gui
     protected String getRepositoryName() {
         return this.getClass().getSimpleName();
     }
-
 }
